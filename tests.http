@@ -1,0 +1,86 @@
+# Test your FastAPI endpoints
+
+### Health Check
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+### ======================
+### USER ENDPOINTS
+### ======================
+
+### Create a user
+POST http://127.0.0.1:8000/v1/users/
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "full_name": "John Doe"
+}
+
+### Get all users
+GET http://127.0.0.1:8000/v1/users/
+Accept: application/json
+
+### Get all users with pagination
+GET http://127.0.0.1:8000/v1/users/?skip=0&limit=10
+Accept: application/json
+
+### Get specific user
+GET http://127.0.0.1:8000/v1/users/1
+Accept: application/json
+
+### Update user
+PATCH http://127.0.0.1:8000/v1/users/1
+Content-Type: application/json
+
+{
+  "email": "newemail@example.com",
+  "full_name": "John Updated Doe"
+}
+
+### Delete user
+DELETE http://127.0.0.1:8000/v1/users/1
+
+### ======================
+### PRODUCT ENDPOINTS
+### ======================
+
+### Create a product
+POST http://127.0.0.1:8000/v1/products/
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "description": "High-performance laptop",
+  "price": 999.99,
+  "in_stock": true
+}
+
+### Get all products
+GET http://127.0.0.1:8000/v1/products/
+Accept: application/json
+
+### Get products with filters
+GET http://127.0.0.1:8000/v1/products/?in_stock_only=true&limit=20
+Accept: application/json
+
+### Search products
+GET http://127.0.0.1:8000/v1/products/search?q=laptop
+Accept: application/json
+
+### Get specific product
+GET http://127.0.0.1:8000/v1/products/1
+Accept: application/json
+
+### Update product
+PATCH http://127.0.0.1:8000/v1/products/1
+Content-Type: application/json
+
+{
+  "price": 899.99,
+  "in_stock": false
+}
+
+### Delete product
+DELETE http://127.0.0.1:8000/v1/products/1
