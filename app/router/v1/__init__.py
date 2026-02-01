@@ -1,7 +1,9 @@
 from fastapi import APIRouter
-from .users import router as users_router
-from .products import router as products_router
+from .project_endpoint import router as projects_router
+from .scan_endpoint import router as scan_router
+from .qr_code_endpoint import router as qr_code_router
 
 router = APIRouter(prefix="/v1")
-router.include_router(users_router)
-router.include_router(products_router)
+router.include_router(projects_router)
+router.include_router(scan_router)
+router.include_router(qr_code_router)
