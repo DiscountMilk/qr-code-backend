@@ -1,61 +1,64 @@
-import os
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import requests
+from jwt.algorithms import RSAAlgorithm
+import json
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer
+import os
 
-clerk_config = ClerkConfig(
-    jwks_url=os.getenv(
-        "CLERK_JWKS_URL",
-        "https://splendid-toucan-17.clerk.accounts.dev/.well-known/jwks.json"))
-
-clerk_auth_guard = ClerkHTTPBearer(config=clerk_config, debug_mode=True)
-
-#test_auth_guard = HTTPBearer()
+security = HTTPBearer()
 
 
-def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials = Depends(clerk_auth_guard),
-) -> str:
-    if not credentials or not credentials.decoded:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    """Validiert JWT Token mit Clerk JWKS (inkl. Signatur-Prüfung)"""
+    token = credentials.credentials
 
-    user_id = credentials.decoded.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User id missing")
+    try:
+        # Hole JWKS von Clerk (ohne SSL-Verifizierung für lokale Entwicklung)
+        jwks_url = os.getenv("CLERK_JWKS_URL")
+        response = requests.get(jwks_url, verify=False)
+        response.raise_for_status()
+        jwks = response.json()
 
-    return user_id
+        # Dekodiere Token Header um kid zu bekommen
+        header = jwt.get_unverified_header(token)
+        kid = header.get("kid")
 
+        if not kid:
+            raise HTTPException(status_code=401, detail="No kid in token header")
 
-#def get_current_user_id_dev(
-#    credentials: HTTPAuthorizationCredentials = Depends(test_auth_guard),
-#) -> str:
-#    """Development-only auth that accepts test tokens"""
-#    if not credentials:
-#        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-#
-#    token = credentials.credentials
-#
-#    # Try test token first (in development)
-#    if os.getenv("ENVIRONMENT", "development") != "production":
- #       try:
- #           secret = os.getenv("TEST_JWT_SECRET", "test_secret_key_for_development_only")
- #           decoded = jwt.decode(token, secret, algorithms=["HS256"])
- #           user_id = decoded.get("sub")
- #           if user_id:
- #               return user_id
-#        except jwt.InvalidTokenError:
-#            pass  # Fall through to Clerk auth
-#
-#    # Fall back to Clerk auth
-#    try:
-#        clerk_guard = ClerkHTTPBearer(config=clerk_config)
-#        clerk_creds = clerk_guard(credentials)
-#        if clerk_creds and clerk_creds.decoded:
-     #       user_id = clerk_creds.decoded.get("sub")
-    #        if user_id:
-   #             return user_id
-  #  except Exception:
- #       pass
-#
-#    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        # Finde den passenden Key im JWKS
+        public_key = None
+        for key in jwks.get("keys", []):
+            if key.get("kid") == kid:
+                public_key = RSAAlgorithm.from_jwk(json.dumps(key))
+                break
+
+        if not public_key:
+            raise HTTPException(status_code=401, detail=f"Public key not found for kid: {kid}")
+
+        # Dekodiere und validiere den Token
+        decoded = jwt.decode(
+            token,
+            public_key,
+            algorithms=["RS256"],
+            options={
+                "verify_signature": True,
+                "verify_exp": True,
+                "verify_nbf": True,
+                "verify_iat": True,
+            }
+        )
+
+        user_id = decoded.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="User ID not found in token")
+
+        return user_id
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Token validation failed: {str(e)}")

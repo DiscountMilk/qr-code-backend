@@ -3,7 +3,7 @@ from datetime import datetime
 
 class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200, description="Project name")
-    target_url: HttpUrl = Field(..., description="URL where QR codes redirect to")
+    target_url: str = Field(..., description="URL where QR codes redirect to")
 
 class ProjectUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)

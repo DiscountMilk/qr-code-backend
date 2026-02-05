@@ -3,5 +3,3 @@ uvicorn[standard]
 pydantic
 supabase
 python-dotenv
-fastapi-clerk-auth
-pyjwt
