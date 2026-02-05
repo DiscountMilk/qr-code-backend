@@ -7,8 +7,197 @@
 # Project E2E Tests
 # =====================
 
-### Test: Get all items
+### Test 1: Create a new project
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "My Test Project",
+  "target_url": "https://example.com/landing-page"
+}
+
+###
+
+### Test 2: Get all projects
 GET {{baseURL}}/v1/projects/
 Accept: application/json
 Authorization: Bearer {{token}}
+
+###
+
+### Test 3: Get a specific project by ID (replace {project_id} with actual ID from create response)
+GET {{baseURL}}/v1/projects/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Test 4: Update a project (replace {project_id} with actual ID)
+PATCH {{baseURL}}/v1/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Updated Project Name",
+  "target_url": "https://example.com/new-landing-page"
+}
+
+###
+
+### Test 5: Partially update a project - name only
+PATCH {{baseURL}}/v1/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Another Name Update"
+}
+
+###
+
+### Test 6: Partially update a project - target_url only
+PATCH {{baseURL}}/v1/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "target_url": "https://newdomain.com/page"
+}
+
+###
+
+### Test 7: Deactivate a project
+PATCH {{baseURL}}/v1/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "is_active": false
+}
+
+###
+
+### Test 8: Reactivate a project
+PATCH {{baseURL}}/v1/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "is_active": true
+}
+
+###
+
+### Test 9: Delete a project (soft delete) (replace {project_id} with actual ID)
+DELETE {{baseURL}}/v1/projects/1
+Authorization: Bearer {{token}}
+
+###
+
+### Test 10: Try to get a deleted project (should return 404)
+GET {{baseURL}}/v1/projects/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Test 11: Create project with minimal data
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Minimal Project",
+  "target_url": "https://minimal.com"
+}
+
+###
+
+### Test 12: Create project with long name (boundary test)
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "This is a very long project name that tests the maximum length boundary of 200 characters to ensure validation works correctly and handles edge cases properly in the system implementation",
+  "target_url": "https://example.com"
+}
+
+###
+
+### Test 13: Try to create project with empty name (should fail validation)
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "",
+  "target_url": "https://example.com"
+}
+
+###
+
+### Test 14: Try to create project without name (should fail validation)
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "target_url": "https://example.com"
+}
+
+###
+
+### Test 15: Try to create project without target_url (should fail validation)
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Test Project"
+}
+
+###
+
+### Test 16: Try to get non-existent project (should return 404)
+GET {{baseURL}}/v1/projects/99999
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Test 17: Try to update non-existent project (should return 404)
+PATCH {{baseURL}}/v1/projects/99999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Should Not Work"
+}
+
+###
+
+### Test 18: Try to delete non-existent project (should return 404)
+DELETE {{baseURL}}/v1/projects/99999
+Authorization: Bearer {{token}}
+
+###
+
+### Test 19: Create project without authorization (should return 401)
+POST {{baseURL}}/v1/projects/
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Project",
+  "target_url": "https://example.com"
+}
+
+###
+
+### Test 20: Get projects without authorization (should return 401)
+GET {{baseURL}}/v1/projects/
+Accept: application/json
+
+###
 

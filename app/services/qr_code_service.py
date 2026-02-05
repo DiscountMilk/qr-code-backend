@@ -12,8 +12,6 @@ class QRCodeService:
             .eq("user_id", user_id)
             .execute()
         )
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         return bool(response.data)
 
     async def create_qr_code(self, project_id: int, user_id: str) -> QRCodeResponse:
@@ -23,25 +21,19 @@ class QRCodeService:
         data = {
             "project_id": project_id,
             "code": uuid4().hex,
-            "is_active": True,
+            "is_active": False,
         }
         response = supabase.table("qr_codes").insert(data).execute()
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         return QRCodeResponse(**response.data[0])
 
-    async def get_qr_codes(
-        self, project_id: int, user_id: str, include_deleted: bool = False
-    ) -> list[QRCodeResponse]:
+    async def get_qr_codes(self, project_id: int, user_id: str, include_deleted: bool = False) -> list[QRCodeResponse]:
         if not await self._project_owned(project_id, user_id):
             raise HTTPException(status_code=404, detail="Project not found")
 
         query = supabase.table("qr_codes").select("*").eq("project_id", project_id)
         if not include_deleted:
-            query = query.eq("deleted_at", None)
+            query = query.eq("deleted_at", None).eq("user_id", user_id)
         response = query.execute()
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         return [QRCodeResponse(**item) for item in response.data]
 
     async def get_qr_code(self, project_id: int, qrcode_id: int, user_id: str) -> QRCodeResponse | None:
@@ -53,17 +45,14 @@ class QRCodeService:
             .select("*")
             .eq("id", qrcode_id)
             .eq("project_id", project_id)
+            .eq("user_id", user_id)
             .execute()
         )
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         if not response.data:
             return None
         return QRCodeResponse(**response.data[0])
 
-    async def update_qr_code(
-        self, project_id: int, qrcode_id: int, qr_code_update: QRCodeUpdate, user_id: str
-    ) -> QRCodeResponse | None:
+    async def update_qr_code(self, project_id: int, qrcode_id: int, qr_code_update: QRCodeUpdate, user_id: str) -> QRCodeResponse | None:
         if not await self._project_owned(project_id, user_id):
             raise HTTPException(status_code=404, detail="Project not found")
 
@@ -77,10 +66,9 @@ class QRCodeService:
             .update(data)
             .eq("id", qrcode_id)
             .eq("project_id", project_id)
+            .eq("user_id", user_id)
             .execute()
         )
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         if not response.data:
             return None
         return QRCodeResponse(**response.data[0])
@@ -94,8 +82,7 @@ class QRCodeService:
             .update({"deleted_at": "now()", "is_active": False})
             .eq("id", qrcode_id)
             .eq("project_id", project_id)
+            .eq("user_id", user_id)
             .execute()
         )
-        if response.error:
-            raise HTTPException(status_code=400, detail=response.error.message)
         return bool(response.data)
