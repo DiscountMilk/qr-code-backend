@@ -7,7 +7,7 @@ class ProjectCreate(BaseModel):
 
 class ProjectUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
-    target_url: HttpUrl | None = None
+    target_url: str | None = None
     is_active: bool | None = None
 
 class ProjectResponse(BaseModel):
