@@ -1,86 +1,13 @@
-# Test your FastAPI endpoints
+@baseURL = http://localhost:8000
+@token = eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDIyMkFBQSIsImtpZCI6Imluc18zOUFabVhKWXFuMVQxb0dPaXRqVzl1M2l4M1kiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE4MDE3NTMwNzQsImlhdCI6MTc3MDIxNzA3NCwiaXNzIjoiaHR0cHM6Ly9zcGxlbmRpZC10b3VjYW4tMTcuY2xlcmsuYWNjb3VudHMuZGV2IiwianRpIjoiMTE4Y2Q2NmQ2ODQxZmE0NTBlN2IiLCJuYmYiOjE3NzAyMTcwNjksInN1YiI6InVzZXJfMzlBZzh5djFDQ0tlZFJkOHRrY1lqeTZJaERuIn0.CzhTdh7sjHkX_pWufsx37sFkIbAs_4gSIXX1ON-FI9mpVSs6Um6eWN5OQrYpl9SJFOxoYhU5hSfgRCGOzupCdac6kCw5O-bJ9KajGsDoFGlovOQ2p-Is2wFKZpC2a-vZAMeyVPB7ItDSzNCCJEh9duU7mk7onySARWxmoNjVWTEJcnaMcVYLb8IpByqmCBSUgEjkJD-lyoBZ3Phb_C3wyM5OIg0XEL05mLhi4Ztm7lR6c6i-kF8YsaZbYswDKYQs5SQsoxExdU_8RrmT2WGk9HE15ttDoSZFDW3pbFaQLP3TioVE4gshbEMLzqpfjHnRiS7BPlVled8UjCHwo0aK-w
+@userId = user_39Ag8yv1CCKedRd8tkcYjy6IhDn
 
-### Health Check
-GET http://127.0.0.1:8000/
+
+# =====================
+# Project E2E Tests
+# =====================
+
+### Test: Get all items
+GET {{baseURL}}/v1/projects/
 Accept: application/json
-
-### ======================
-### USER ENDPOINTS
-### ======================
-
-### Create a user
-POST http://127.0.0.1:8000/v1/users/
-Content-Type: application/json
-
-{
-  "username": "johndoe",
-  "email": "john@example.com",
-  "full_name": "John Doe"
-}
-
-### Get all users
-GET http://127.0.0.1:8000/v1/users/
-Accept: application/json
-
-### Get all users with pagination
-GET http://127.0.0.1:8000/v1/users/?skip=0&limit=10
-Accept: application/json
-
-### Get specific user
-GET http://127.0.0.1:8000/v1/users/1
-Accept: application/json
-
-### Update user
-PATCH http://127.0.0.1:8000/v1/users/1
-Content-Type: application/json
-
-{
-  "email": "newemail@example.com",
-  "full_name": "John Updated Doe"
-}
-
-### Delete user
-DELETE http://127.0.0.1:8000/v1/users/1
-
-### ======================
-### PRODUCT ENDPOINTS
-### ======================
-
-### Create a product
-POST http://127.0.0.1:8000/v1/products/
-Content-Type: application/json
-
-{
-  "name": "Laptop",
-  "description": "High-performance laptop",
-  "price": 999.99,
-  "in_stock": true
-}
-
-### Get all products
-GET http://127.0.0.1:8000/v1/products/
-Accept: application/json
-
-### Get products with filters
-GET http://127.0.0.1:8000/v1/products/?in_stock_only=true&limit=20
-Accept: application/json
-
-### Search products
-GET http://127.0.0.1:8000/v1/products/search?q=laptop
-Accept: application/json
-
-### Get specific product
-GET http://127.0.0.1:8000/v1/products/1
-Accept: application/json
-
-### Update product
-PATCH http://127.0.0.1:8000/v1/products/1
-Content-Type: application/json
-
-{
-  "price": 899.99,
-  "in_stock": false
-}
-
-### Delete product
-DELETE http://127.0.0.1:8000/v1/products/1
+Authorization: Bearer {{token}}
